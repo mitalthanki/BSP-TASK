@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+
+class CompanyController extends Controller
+{
+    public function index(Request $request): View
+    {
+        $companies = $request->user()->companies()
+            ->with(['country', 'state', 'city', 'services', 'branches'])
+            ->latest()
+            ->paginate(15);
+
+        return view('companies.index', compact('companies'));
+    }
+
+    public function create(): View
+    {
+        return view('companies.create');
+    }
+
+    public function store(StoreCompanyRequest $request): RedirectResponse
+    {
+        $data = $request->safe()->except(['logo', 'services', 'branches']);
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('companies/logos', 'public');
+        }
+
+        $company = $request->user()->companies()->create($data);
+        $company->services()->sync($request->validated('services', []));
+        $company->branches()->sync($request->validated('branches', []));
+
+        return to_route('companies.index')->with('success', 'Company created successfully.');
+    }
+
+    public function edit(Request $request, string $company): View
+    {
+        $company = $request->user()->companies()->findOrFail($company);
+
+        return view('companies.edit', compact('company'));
+    }
+
+    public function update(UpdateCompanyRequest $request, string $company): RedirectResponse
+    {
+        $company = $request->user()->companies()->findOrFail($company);
+        $data = $request->safe()->except(['logo', 'services', 'branches']);
+
+        if ($request->hasFile('logo')) {
+            if ($company->logo !== null) {
+                Storage::disk('public')->delete($company->logo);
+            }
+
+            $data['logo'] = $request->file('logo')->store('companies/logos', 'public');
+        }
+
+        $company->update($data);
+        $company->services()->sync($request->validated('services', []));
+        $company->branches()->sync($request->validated('branches', []));
+
+        return to_route('companies.index')->with('success', 'Company updated successfully.');
+    }
+
+    public function destroy(Request $request, string $company): RedirectResponse
+    {
+        $company = $request->user()->companies()->findOrFail($company);
+
+        if ($company->logo !== null) {
+            Storage::disk('public')->delete($company->logo);
+        }
+
+        $company->delete();
+
+        return to_route('companies.index')->with('success', 'Company deleted successfully.');
+    }
+}
