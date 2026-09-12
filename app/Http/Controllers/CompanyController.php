@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Models\Branch;
+use App\Models\Country;
+use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +26,11 @@ class CompanyController extends Controller
 
     public function create(): View
     {
-        return view('companies.create');
+        return view('companies.create', [
+            'countries' => Country::query()->with('states.cities')->orderBy('name')->get(),
+            'services' => Service::query()->orderBy('name')->get(),
+            'branches' => Branch::query()->orderBy('name')->get(),
+        ]);
     }
 
     public function store(StoreCompanyRequest $request): RedirectResponse
@@ -45,7 +52,12 @@ class CompanyController extends Controller
     {
         $company = $request->user()->companies()->findOrFail($company);
 
-        return view('companies.edit', compact('company'));
+        return view('companies.edit', [
+            'company' => $company->load('services', 'branches'),
+            'countries' => Country::query()->with('states.cities')->orderBy('name')->get(),
+            'services' => Service::query()->orderBy('name')->get(),
+            'branches' => Branch::query()->orderBy('name')->get(),
+        ]);
     }
 
     public function update(UpdateCompanyRequest $request, string $company): RedirectResponse
