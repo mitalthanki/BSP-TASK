@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Company extends Model
 {
     protected $fillable = [
-        'user_id', 'logo', 'company_name', 'email', 'mobile', 'country_id', 'state_id', 'city_id',
+        'logo', 'company_name', 'email', 'mobile', 'country_id', 'state_id', 'city_id',
     ];
 
     public function user(): BelongsTo
