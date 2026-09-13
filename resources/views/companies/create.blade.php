@@ -87,17 +87,19 @@
                     </div>
                 </div>
 
-                <div>
-                    <x-input-label for="services" value="Services" />
-                    <select id="services" name="services[]" multiple class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <fieldset>
+                    <legend class="text-sm font-medium text-gray-700">Services *</legend>
+                    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         @foreach ($services as $service)
-                            <option value="{{ $service->id }}" @selected(in_array($service->id, old('services', [])))>{{ $service->name }}</option>
+                            <label class="flex items-center gap-2 rounded-md border border-gray-200 p-3 text-sm text-gray-700 transition hover:border-indigo-300 hover:bg-indigo-50">
+                                <input type="checkbox" name="services[]" value="{{ $service->id }}" @checked(in_array($service->id, old('services', []))) class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                                {{ $service->name }}
+                            </label>
                         @endforeach
-                    </select>
-                    <p class="mt-1 text-sm text-gray-500">Hold Ctrl (Windows) or Command (Mac) to select multiple services.</p>
+                    </div>
                     <x-input-error :messages="$errors->get('services')" class="mt-2" />
                     <x-input-error :messages="$errors->get('services.*')" class="mt-2" />
-                </div>
+                </fieldset>
 
                 <fieldset>
                     <legend class="text-sm font-medium text-gray-700">Branches</legend>

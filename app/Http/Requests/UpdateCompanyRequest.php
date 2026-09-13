@@ -26,8 +26,8 @@ class UpdateCompanyRequest extends FormRequest
             'country_id' => ['required', 'integer', Rule::exists('countries', 'id')],
             'state_id' => ['required', 'integer', Rule::exists('states', 'id')->where('country_id', $this->integer('country_id'))],
             'city_id' => ['required', 'integer', Rule::exists('cities', 'id')->where('state_id', $this->integer('state_id'))],
-            'services' => ['nullable', 'array'],
-            'services.*' => ['integer', 'distinct', Rule::exists('services', 'id')],
+            'services' => ['required', 'array', 'min:1'],
+            'services.*' => ['required', 'integer', 'distinct', Rule::exists('services', 'id')],
             'branches' => ['nullable', 'array'],
             'branches.*' => ['integer', 'distinct', Rule::exists('branches', 'id')],
         ];
