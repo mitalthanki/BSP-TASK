@@ -38,7 +38,7 @@ class CompanyController extends Controller
         $data = $request->safe()->except(['logo', 'services', 'branches']);
 
         if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('companies/logos', 'public');
+            $data['logo'] = Storage::disk('public')->putFile('company-logos', $request->file('logo'), 'public');
         }
 
         $company = $request->user()->companies()->create($data);
@@ -66,11 +66,12 @@ class CompanyController extends Controller
         $data = $request->safe()->except(['logo', 'services', 'branches']);
 
         if ($request->hasFile('logo')) {
-            if ($company->logo !== null) {
-                Storage::disk('public')->delete($company->logo);
-            }
+            $oldLogo = $company->logo;
+            $data['logo'] = Storage::disk('public')->putFile('company-logos', $request->file('logo'), 'public');
 
-            $data['logo'] = $request->file('logo')->store('companies/logos', 'public');
+            if ($oldLogo !== null) {
+                Storage::disk('public')->delete($oldLogo);
+            }
         }
 
         $company->update($data);
