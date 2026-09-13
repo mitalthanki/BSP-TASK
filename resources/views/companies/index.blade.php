@@ -29,6 +29,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Contact</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Services</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Branches</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                                 </tr>
                             </thead>
@@ -51,6 +52,7 @@
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $company->city->name }}, {{ $company->state->name }}, {{ $company->country->name }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-600">{{ $company->services->pluck('name')->join(', ') ?: '—' }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">{{ $company->branches->pluck('name')->join(', ') ?: '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <a href="{{ route('companies.edit', $company) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                             <form method="POST" action="{{ route('companies.destroy', $company) }}" class="ml-3 inline" onsubmit="return confirm('Delete this company?');">
