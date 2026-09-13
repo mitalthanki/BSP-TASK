@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,5 +20,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('companies', CompanyController::class)->except(['show'])->middleware('auth');
+Route::get('states/{country}', [LocationController::class, 'states'])->middleware('auth');
+Route::get('cities/{state}', [LocationController::class, 'cities'])->middleware('auth');
 
 require __DIR__.'/auth.php';

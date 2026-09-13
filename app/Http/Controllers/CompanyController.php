@@ -27,7 +27,7 @@ class CompanyController extends Controller
     public function create(): View
     {
         return view('companies.create', [
-            'countries' => Country::query()->with('states.cities')->orderBy('name')->get(),
+            'countries' => Country::query()->orderBy('name')->get(),
             'services' => Service::query()->orderBy('name')->get(),
             'branches' => Branch::query()->orderBy('name')->get(),
         ]);
@@ -54,7 +54,7 @@ class CompanyController extends Controller
 
         return view('companies.edit', [
             'company' => $company->load('services', 'branches'),
-            'countries' => Country::query()->with('states.cities')->orderBy('name')->get(),
+            'countries' => Country::query()->orderBy('name')->get(),
             'services' => Service::query()->orderBy('name')->get(),
             'branches' => Branch::query()->orderBy('name')->get(),
         ]);

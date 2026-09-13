@@ -7,15 +7,6 @@
     </x-slot>
 
     @php
-        $locations = $countries->map(fn ($country) => [
-            'id' => $country->id,
-            'name' => $country->name,
-            'states' => $country->states->map(fn ($state) => [
-                'id' => $state->id,
-                'name' => $state->name,
-                'cities' => $state->cities->map(fn ($city) => ['id' => $city->id, 'name' => $city->name]),
-            ]),
-        ]);
         $selectedServices = old('services', $company->services->modelKeys());
         $selectedBranches = old('branches', $company->branches->modelKeys());
     @endphp
@@ -23,13 +14,27 @@
     <div class="py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <form method="POST" action="{{ route('companies.update', $company) }}" enctype="multipart/form-data" class="bg-white shadow-sm rounded-lg p-6 space-y-6" x-data="{
-                countries: @js($locations),
+                states: [],
+                cities: [],
                 countryId: @js((string) old('country_id', $company->country_id)),
                 stateId: @js((string) old('state_id', $company->state_id)),
                 cityId: @js((string) old('city_id', $company->city_id)),
-                get states() { return this.countries.find(country => String(country.id) === String(this.countryId))?.states ?? []; },
-                get cities() { return this.states.find(state => String(state.id) === String(this.stateId))?.cities ?? []; }
-            }">
+                async loadStates(reset = true) {
+                    if (reset) { this.stateId = ''; this.cityId = ''; }
+                    this.states = []; this.cities = [];
+                    if (! this.countryId) return;
+                    const response = await fetch('/states/' + this.countryId, { headers: { Accept: 'application/json' } });
+                    this.states = await response.json();
+                },
+                async loadCities(reset = true) {
+                    if (reset) this.cityId = '';
+                    this.cities = [];
+                    if (! this.stateId) return;
+                    const response = await fetch('/cities/' + this.stateId, { headers: { Accept: 'application/json' } });
+                    this.cities = await response.json();
+                },
+                async init() { await this.loadStates(false); await this.loadCities(false); }
+            }" x-init="init()">
                 @csrf
                 @method('PUT')
 
@@ -63,7 +68,7 @@
 
                     <div>
                         <x-input-label for="country_id" value="Country" />
-                        <select id="country_id" name="country_id" x-model="countryId" @change="stateId = ''; cityId = ''" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        <select id="country_id" name="country_id" x-model="countryId" @change="loadStates()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                             <option value="">Select country</option>
                             @foreach ($countries as $country)
                                 <option value="{{ $country->id }}">{{ $country->name }}</option>
@@ -74,7 +79,7 @@
 
                     <div>
                         <x-input-label for="state_id" value="State" />
-                        <select id="state_id" name="state_id" x-model="stateId" @change="cityId = ''" :disabled="! countryId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100" required>
+                        <select id="state_id" name="state_id" x-model="stateId" @change="loadCities()" :disabled="! countryId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100" required>
                             <option value="">Select state</option>
                             <template x-for="state in states" :key="state.id"><option :value="state.id" x-text="state.name"></option></template>
                         </select>
